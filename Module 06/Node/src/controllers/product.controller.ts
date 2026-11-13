@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 import {createProduct, productService} from "../service/product.service";
 import type { Iproduct } from "../types/product";
 import { bodyParser } from "../utils/parseBody";
+import { sendResponse } from "../utils/sendResponse";
 
 const productController = async (req: IncomingMessage , res: ServerResponse)=>{
   const url = req.url;
@@ -15,31 +16,22 @@ const productController = async (req: IncomingMessage , res: ServerResponse)=>{
 
   // Get all products
   if ( url === "/products" && method === "GET"){
-      res.writeHead(200,{"Content-Type": "application/json"});
-      res.end(JSON.stringify({
-        message: "Products retrive successfully!!",
-        data: products
-      }
-      ));
+    try{
+      sendResponse(res, true, 200, "Product retrived successfully", products);
+    }catch(error){
+      sendResponse(res, false, 400, "Internal server error");
+    }
   }
   else if ( method === "GET" && id !== null ){
-    const product = products.find((p: Iproduct) => p.id === id)
-    
-    if ( !product){
-      res.writeHead(404,{"Content-Type": "application/json"});
-      res.end(JSON.stringify({
-        message: "Product id not found",
+    try{
+      const product = products.find((p: Iproduct) => p.id === id)
+      if ( !product){
+        return sendResponse(res, false, 404, "Product not found!");
       }
-      ));
-      return;
+      sendResponse(res, true, 200, "Product retrived successfully", product);
+    }catch(error){
+      sendResponse(res, false, 400, "Internal server error");
     }
-
-      res.writeHead(200,{"Content-Type": "application/json"});
-      res.end(JSON.stringify({
-        message: "Product retrive successfully!!",
-        data: product
-      }
-      ));
   }
   else if (method === "POST" && url === "/products"){
     const body = await bodyParser(req);
