@@ -3,9 +3,11 @@ import fs from "node:fs"
 
 const filePath = path.join(process.cwd(), "./src/database/db.json" ); 
 
-const productService = ()=>{
+export const productService = ()=>{
   const result = fs.readFileSync(filePath , "utf-8");
   return JSON.parse(result);
 }
 
-export default productService
+export const createProduct = (payload: any)=>{
+  fs.writeFileSync(filePath, payload);
+};
