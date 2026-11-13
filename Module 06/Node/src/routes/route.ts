@@ -10,7 +10,6 @@ const routeHandler = (req: IncomingMessage, res: ServerResponse)=> {
     res.end(JSON.stringify({message: "This is Root Route"}));
   }
   else if(url?.startsWith("/products")){
-    // Product -> GET , PUT, UPDATE ( handle on controller layer)
     productController(req, res);
   }
   else{
