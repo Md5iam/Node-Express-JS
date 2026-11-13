@@ -12,6 +12,6 @@ export const bodyParser = (req: IncomingMessage): Promise<any>=>{
       }catch(error){
         reject(error);
       }
-    })
-  })
-}
+    });
+  });
+};
