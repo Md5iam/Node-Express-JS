@@ -1,10 +1,12 @@
 [
   {
     "id": 1,
-    "name": "Mango"
+    "name": "Mango",
+    "price": 100
   },
   {
     "id": 2,
-    "name": "Banana"
+    "name": "Banana",
+    "price":200
   }
 ]
