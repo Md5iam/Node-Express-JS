@@ -1,6 +1,6 @@
 import { Message } from './../node_modules/esbuild/lib/main.d';
 import express, { Application, Request, Response } from "express"
-import {Pool} from "pg"
+import { Pool } from 'pg';
 const app: Application = express()
 const port = 5000
 
@@ -67,6 +67,58 @@ app.post("/api/v1/users", async(req, res)=>{
       message: "User created!!",
       data: result.rows[0],
     });
+  }catch(error: any){
+    res.status(500).json({
+      success:false,
+      message: error?.message,
+      error: error,
+    });
+  }
+});
+
+app.get("/api/v1/users", async(req: Request, res: Response)=>{
+  try{
+    const result = await pool.query(`
+      SELECT * FROM users
+      `);
+    // console.log(result);
+    res.status(200).json({
+      success:true,
+      message: "All users retrived successfully!!",
+      data: result.rows,
+    });
+  }catch(error: any){
+    res.status(500).json({
+      success:false,
+      message: error?.message,
+      error: error,
+    });
+  }
+});
+
+app.get("/api/v1/users/:id", async(req: Request, res: Response)=>{
+  try{
+    const {id} = req.params;
+    const result = await pool.query(`
+      SELECT * FROM users WHERE id=$1
+      `,
+    [id],
+  );
+
+  // extra add by siam 
+  if (result.rows.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  // console.log(result);
+  res.status(200).json({
+    success:true,
+    message: "User retrived successfully!!",
+    data: result.rows[0],
+  });
   }catch(error: any){
     res.status(500).json({
       success:false,
