@@ -48,34 +48,6 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-app.post("/api/v1/users", async(req, res)=>{
-  try{
-    // console.log(req.body);
-    const {name , email, password, age} = req.body;
-    // console.log(password);
-
-    const result = await pool.query(`
-        INSERT INTO users (name , email, password , age )
-        VALUES ($1, $2, $3, $4) RETURNING *
-      `,
-      [name,email,password, age],
-    );
-    console.log(result);
-    
-    res.status(201).json({
-      success:true,
-      message: "User created!!",
-      data: result.rows[0],
-    });
-  }catch(error: any){
-    res.status(500).json({
-      success:false,
-      message: error?.message,
-      error: error,
-    });
-  }
-});
-
 app.get("/api/v1/users", async(req: Request, res: Response)=>{
   try{
     const result = await pool.query(`
@@ -106,7 +78,7 @@ app.get("/api/v1/users/:id", async(req: Request, res: Response)=>{
   );
 
   // extra add by siam 
-  if (result.rows.length === 0) {
+  if (result.rowCount === 0) {
     return res.status(404).json({
       success: false,
       message: "User not found",
@@ -128,6 +100,34 @@ app.get("/api/v1/users/:id", async(req: Request, res: Response)=>{
   }
 })
 
+app.post("/api/v1/users", async(req, res)=>{
+  try{
+    // console.log(req.body);
+    const {name , email, password, age} = req.body;
+    // console.log(password);
+
+    const result = await pool.query(`
+        INSERT INTO users (name , email, password , age )
+        VALUES ($1, $2, $3, $4) RETURNING *
+      `,
+      [name,email,password, age],
+    );
+    console.log(result);
+    
+    res.status(201).json({
+      success:true,
+      message: "User created!!",
+      data: result.rows[0],
+    });
+  }catch(error: any){
+    res.status(500).json({
+      success:false,
+      message: error?.message,
+      error: error,
+    });
+  }
+});
+
 app.put('/api/v1/users/:id', async(req: Request, res: Response)=>{
   try{
     const {id} = req.params;
@@ -145,6 +145,12 @@ app.put('/api/v1/users/:id', async(req: Request, res: Response)=>{
   [name ?? null, password ?? null, age ?? null, is_Active ?? null , id],
 );
 // console.log(result);
+  if (result.rowCount === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
   res.status(200).json({
     success:true,
     message: "User updated successfully!!",
@@ -159,6 +165,37 @@ app.put('/api/v1/users/:id', async(req: Request, res: Response)=>{
     });
   }
 });
+
+app.delete('/api/v1/users/:id', async(req: Request, res: Response)=>{
+  try{
+    const {id} = req.params;
+    const result = await pool.query(`
+      DELETE FROM users WHERE id=$1
+    `,
+  [id],
+);
+// console.log(result);
+  if (result.rowCount === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  res.status(200).json({
+    success:true,
+    message: "User deleted successfully!!",
+  });
+  }catch(error: any){
+    res.status(500).json({
+      success:false,
+      message: error?.message,
+      error: error,
+    });
+  }
+})
+
+
 
 app.listen(port, () => {
   console.log(`The Express server is running in ${port}`)
