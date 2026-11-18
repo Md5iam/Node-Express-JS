@@ -1,43 +1,51 @@
+import bcrypt from "bcryptjs";
 import { pool } from "../../db";
 import { IUser } from "./user.interface";
 
+const createUserIntoDB = async (payload: IUser) => {
+  const { name, email, password, age } = payload;
 
-const createUserIntoDB = async (payload: IUser)=>{
-  const {name , email, password, age} = payload;
-    const result = await pool.query(`
+  const hashPassword = await bcrypt.hash(password, 10);
+  console.log(hashPassword);
+
+  const result = await pool.query(
+    `
         INSERT INTO users (name , email, password , age )
         VALUES ($1, $2, $3, $4) RETURNING *
       `,
-      [name,email,password, age],
-    );
-    return result;
-}
+    [name, email, hashPassword, age],
+  );
+  delete result.rows[0].password;
+  return result;
+};
 
-const getAllUserFromDB = async()=>{
+const getAllUserFromDB = async () => {
   const result = await pool.query(`
       SELECT * FROM users
       `);
   return result;
-}
+};
 
-const getSingleUserFromDB = async(id: string)=>{
-    // const {id} = req.params;
-    const result = await pool.query(`
+const getSingleUserFromDB = async (id: string) => {
+  // const {id} = req.params;
+  const result = await pool.query(
+    `
       SELECT * FROM users WHERE id=$1
       `,
     [id],
   );
   return result;
-}
+};
 
-const deleteUserFromDB = async(id: string)=>{
-      const result = await pool.query(`
+const deleteUserFromDB = async (id: string) => {
+  const result = await pool.query(
+    `
         DELETE FROM users WHERE id=$1
       `,
     [id],
   );
   return result;
-}
+};
 
 const updateUserFromDB = async (payload: Partial<IUser>, id: string) => {
   const { name, password, age, is_Active } = payload;
@@ -54,16 +62,16 @@ const updateUserFromDB = async (payload: Partial<IUser>, id: string) => {
       WHERE id = $5
       RETURNING *
     `,
-    [name ?? null, password ?? null, age ?? null, is_Active ?? null, id]
+    [name ?? null, password ?? null, age ?? null, is_Active ?? null, id],
   );
 
   return result;
 };
 
-export const userService={
+export const userService = {
   createUserIntoDB,
   getAllUserFromDB,
   getSingleUserFromDB,
   deleteUserFromDB,
-  updateUserFromDB
-}
+  updateUserFromDB,
+};
