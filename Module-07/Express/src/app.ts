@@ -1,5 +1,6 @@
 import express, { Application, Request, Response } from "express"
 import {pool } from './db';
+import { userRoute } from "./modules/users/user.route";
 const app: Application = express()
 
 app.use(express.json())
@@ -69,33 +70,7 @@ app.get("/api/v1/users/:id", async(req: Request, res: Response)=>{
   }
 })
 
-app.post("/api/v1/users", async(req, res)=>{
-  try{
-    // console.log(req.body);
-    const {name , email, password, age} = req.body;
-    // console.log(password);
-
-    const result = await pool.query(`
-        INSERT INTO users (name , email, password , age )
-        VALUES ($1, $2, $3, $4) RETURNING *
-      `,
-      [name,email,password, age],
-    );
-    console.log(result);
-    
-    res.status(201).json({
-      success:true,
-      message: "User created!!",
-      data: result.rows[0],
-    });
-  }catch(error: any){
-    res.status(500).json({
-      success:false,
-      message: error?.message,
-      error: error,
-    });
-  }
-});
+app.use("/api/v1/users" , userRoute);
 
 app.put('/api/v1/users/:id', async(req: Request, res: Response)=>{
   try{
